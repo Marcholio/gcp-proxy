@@ -1,0 +1,65 @@
+swagger: "2.0"
+info:
+  title: proxy-api
+  description: Proxy request through Google Cloud Functions
+  version: 1.0.0
+schemes:
+  - https
+produces:
+  - application/json
+paths:
+  /proxy:
+    post:
+      summary: Proxy
+      operationId: proxy
+      x-google-backend:
+        address: https://<region>-<project>.cloudfunctions.net/proxy-function
+      responses:
+        "200":
+          description: A successful response
+        "400":
+          description: Bad request
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                example: GET
+              url:
+                type: string
+                example: https://google.com
+              headers:
+                type: object
+              body:
+                type: object
+      x-google-quota:
+        metricCosts:
+          total-requests: 1
+
+securityDefinitions:
+  ApiKeyScheme:
+    type: "apiKey"
+    name: "x-api-key"
+    in: "header"
+
+security:
+  - ApiKeyScheme: []
+
+x-google-management:
+  metrics:
+    - name: total-requests
+      displayName: Total API requests
+      valueType: INT64
+      metricKind: DELTA
+
+  quota:
+    limits:
+      - name: total-request-limit
+        metric: total-requests
+        unit: "1/min/{project}"
+        values:
+          STANDARD: 100
